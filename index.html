@@ -3,114 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yo Big - Productivité</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111111">
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <title>InspiredByFlorian - Audio App</title>
+  <meta name="theme-color" content="#000000">
   <style>
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #0d0d0d;
-      color: #fff;
-      padding: 20px;
-    }
-    .app {
-      max-width: 400px;
-      margin: auto;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
     h1 {
-      text-align: center;
-      font-size: 2em;
+      font-size: 1.5rem;
     }
-    input, button {
-      font-size: 1em;
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
+    audio {
+      margin-top: 20px;
+      width: 90%;
+      max-width: 400px;
     }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      margin: 10px 0;
+    button {
       background: #222;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .delete {
-      background: red;
       color: white;
+      padding: 10px 20px;
       border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
+      border-radius: 5px;
+      margin-top: 20px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <h1>Yo Big 🔔</h1>
-    <input id="taskInput" type="text" placeholder="Écris ta tâche ici">
-    <button onclick="addTask()">Ajouter la tâche</button>
-    <ul id="taskList"></ul>
-  </div>
+  <h1>Lecture audio de Florian 🔊</h1>
+  <audio id="audioPlayer" controls autoplay></audio>
+  <button onclick="loadRandomVideo()">Nouvel audio</button>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAMoRo86N0DdEkYGK1mtSSKVP-oVpLePEU",
-      authDomain: "yo-big.firebaseapp.com",
-      databaseURL: "https://yo-big-default-rtdb.firebaseio.com",
-      projectId: "yo-big",
-      storageBucket: "yo-big.firebasestorage.app",
-      messagingSenderId: "773711859870",
-      appId: "1:773711859870:web:3469676a578bbb63ea2b8f",
-      measurementId: "G-WZ2QRNV97T"
-    };
+    const apiKey = "AIzaSyAbXrpAI37cFf1Cmm4G780LVlB6dPcD2lo";
+    const channelId = "UCkzT9qgWbKeiF1U_0s5E2kQ"; // InspiredByFlorian (à adapter si besoin)
+    const audio = document.getElementById('audioPlayer');
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    async function loadRandomVideo() {
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet&order=date&type=video&maxResults=10`);
+      const data = await res.json();
 
-    const input = document.getElementById('taskInput');
-    const list = document.getElementById('taskList');
-
-    function addTask() {
-      const value = input.value.trim();
-      if (value === '') return;
-      const newTaskRef = db.ref('tasks').push();
-      newTaskRef.set({ text: value });
-      input.value = '';
-    }
-
-    function deleteTask(key) {
-      db.ref('tasks/' + key).remove();
-    }
-
-    db.ref('tasks').on('value', snapshot => {
-      const data = snapshot.val();
-      list.innerHTML = '';
-      if (data) {
-        Object.entries(data).forEach(([key, task]) => {
-          const li = document.createElement('li');
-          const span = document.createElement('span');
-          span.textContent = task.text;
-
-          const delBtn = document.createElement('button');
-          delBtn.textContent = 'Supprimer';
-          delBtn.className = 'delete';
-          delBtn.onclick = () => deleteTask(key);
-
-          li.appendChild(span);
-          li.appendChild(delBtn);
-          list.appendChild(li);
-        });
+      if (!data.items || data.items.length === 0) {
+        alert("Aucune vidéo trouvée.");
+        return;
       }
-    });
+
+      const videos = data.items;
+      const randomVideo = videos[Math.floor(Math.random() * videos.length)];
+      const videoId = randomVideo.id.videoId;
+
+      const audioUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+
+      // Hack audio-only: on charge l'audio via youtube-nocookie dans un iframe masqué
+      const iframe = document.createElement('iframe');
+      iframe.src = audioUrl;
+      iframe.allow = "autoplay";
+      iframe.style.width = "1px";
+      iframe.style.height = "1px";
+      iframe.style.opacity = "0";
+      iframe.style.position = "absolute";
+      iframe.style.pointerEvents = "none";
+      document.body.appendChild(iframe);
+
+      audio.src = `https://youtube.com/watch?v=${videoId}`;
+    }
+
+    loadRandomVideo();
   </script>
 </body>
 </html>
