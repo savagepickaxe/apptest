@@ -6,6 +6,8 @@
   <title>Yo Big - Productivité</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#111111">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
     body {
       margin: 0;
@@ -49,35 +51,42 @@
   </div>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMoRo86N0DdEkYGK1mtSSKVP-oVpLePEU",
+      authDomain: "yo-big.firebaseapp.com",
+      databaseURL: "https://yo-big-default-rtdb.firebaseio.com",
+      projectId: "yo-big",
+      storageBucket: "yo-big.firebasestorage.app",
+      messagingSenderId: "773711859870",
+      appId: "1:773711859870:web:3469676a578bbb63ea2b8f",
+      measurementId: "G-WZ2QRNV97T"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const input = document.getElementById('taskInput');
     const list = document.getElementById('taskList');
 
     function addTask() {
       const value = input.value.trim();
       if (value === '') return;
-      const li = document.createElement('li');
-      li.textContent = value;
-      list.appendChild(li);
+      const newTaskRef = db.ref('tasks').push();
+      newTaskRef.set({ text: value });
       input.value = '';
-      saveTasks();
     }
 
-    function saveTasks() {
-      const tasks = [];
-      list.querySelectorAll('li').forEach(li => tasks.push(li.textContent));
-      localStorage.setItem('yoBigTasks', JSON.stringify(tasks));
-    }
-
-    function loadTasks() {
-      const tasks = JSON.parse(localStorage.getItem('yoBigTasks') || '[]');
-      tasks.forEach(task => {
-        const li = document.createElement('li');
-        li.textContent = task;
-        list.appendChild(li);
-      });
-    }
-
-    loadTasks();
+    db.ref('tasks').on('value', snapshot => {
+      const data = snapshot.val();
+      list.innerHTML = '';
+      if (data) {
+        Object.values(data).forEach(task => {
+          const li = document.createElement('li');
+          li.textContent = task.text;
+          list.appendChild(li);
+        });
+      }
+    });
   </script>
 </body>
 </html>
