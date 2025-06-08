@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo Big - Productivité</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111111">
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+      padding: 20px;
+    }
+    .app {
+      max-width: 400px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2em;
+    }
+    input, button {
+      font-size: 1em;
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+      background: #222;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Yo Big 🔔</h1>
+    <input id="taskInput" type="text" placeholder="Écris ta tâche ici">
+    <button onclick="addTask()">Ajouter la tâche</button>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    const input = document.getElementById('taskInput');
+    const list = document.getElementById('taskList');
+
+    function addTask() {
+      const value = input.value.trim();
+      if (value === '') return;
+      const li = document.createElement('li');
+      li.textContent = value;
+      list.appendChild(li);
+      input.value = '';
+      saveTasks();
+    }
+
+    function saveTasks() {
+      const tasks = [];
+      list.querySelectorAll('li').forEach(li => tasks.push(li.textContent));
+      localStorage.setItem('yoBigTasks', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('yoBigTasks') || '[]');
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.textContent = task;
+        list.appendChild(li);
+      });
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>
