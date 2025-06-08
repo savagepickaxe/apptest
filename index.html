@@ -39,6 +39,17 @@
       background: #222;
       padding: 10px;
       border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -76,13 +87,26 @@
       input.value = '';
     }
 
+    function deleteTask(key) {
+      db.ref('tasks/' + key).remove();
+    }
+
     db.ref('tasks').on('value', snapshot => {
       const data = snapshot.val();
       list.innerHTML = '';
       if (data) {
-        Object.values(data).forEach(task => {
+        Object.entries(data).forEach(([key, task]) => {
           const li = document.createElement('li');
-          li.textContent = task.text;
+          const span = document.createElement('span');
+          span.textContent = task.text;
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Supprimer';
+          delBtn.className = 'delete';
+          delBtn.onclick = () => deleteTask(key);
+
+          li.appendChild(span);
+          li.appendChild(delBtn);
           list.appendChild(li);
         });
       }
